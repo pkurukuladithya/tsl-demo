@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || "";
+const envApiUrl = import.meta.env.VITE_API_URL?.trim();
+const defaultApiUrl = import.meta.env.PROD
+  ? "https://tsl-demo.onrender.com"
+  : "http://localhost:5000";
+const API_URL = (envApiUrl || defaultApiUrl).replace(/\/$/, "");
+const buildUrl = (path) =>
+  `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
 const parseJson = async (res) => {
   const text = await res.text();
@@ -13,7 +19,7 @@ const parseJson = async (res) => {
 };
 
 const request = async (path, options = {}) => {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(buildUrl(path), {
     credentials: "include",
     ...options,
     headers: {

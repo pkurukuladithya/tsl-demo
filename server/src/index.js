@@ -23,9 +23,17 @@ envPaths.forEach((envPath) => {
 });
 
 const app = express();
-const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim())
-  : ["http://localhost:5173"];
+const defaultOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://tsldemo.vercel.app"
+];
+const envOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",").map((origin) =>
+      origin.trim().replace(/\/$/, "")
+    )
+  : [];
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
@@ -33,7 +41,13 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true
   })
 );

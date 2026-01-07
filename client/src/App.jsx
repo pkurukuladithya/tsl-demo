@@ -1,42 +1,61 @@
-import { useEffect, useState } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
+import DeveloperBadge from "./components/DeveloperBadge.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Home from "./pages/Home.jsx";
+import Customize from "./pages/Customize.jsx";
+import CustomizeCategory from "./pages/CustomizeCategory.jsx";
+import CustomizeProduct from "./pages/CustomizeProduct.jsx";
+import Cart from "./pages/Cart.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Orders from "./pages/Orders.jsx";
+import Profile from "./pages/Profile.jsx";
+import AboutDeveloper from "./pages/AboutDeveloper.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
-  const [health, setHealth] = useState(null);
-  const [items, setItems] = useState([]);
-  const [name, setName] = useState("");
-
-  useEffect(() => {
-    fetch("/api/health").then(r => r.json()).then(setHealth);
-    fetch("/api/items").then(r => r.json()).then(setItems);
-  }, []);
-
-  const addItem = async () => {
-    const res = await fetch("/api/items", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name })
-    });
-    const newItem = await res.json();
-    setItems([newItem, ...items]);
-    setName("");
-  };
+  const location = useLocation();
+  const isDeveloperPage = location.pathname === "/about-developer";
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>tsl-demo</h1>
-
-      <p>Health: {health ? health.msg : "Loading..."}</p>
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Item name" />
-        <button onClick={addItem}>Add</button>
-      </div>
-
-      <ul>
-        {items.map((i) => (
-          <li key={i._id}>{i.name}</li>
-        ))}
-      </ul>
+    <div className="min-h-screen flex flex-col">
+      {isDeveloperPage ? null : <Navbar />}
+      <main className={`flex-1 ${isDeveloperPage ? "" : "pt-24"}`}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/customize" element={<Customize />} />
+          <Route path="/customize/:category" element={<CustomizeCategory />} />
+          <Route
+            path="/customize/:category/:productId"
+            element={<CustomizeProduct />}
+          />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/about-developer" element={<AboutDeveloper />} />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      {isDeveloperPage ? null : <Footer />}
+      {isDeveloperPage ? null : <DeveloperBadge />}
     </div>
   );
 }

@@ -14,10 +14,7 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const envPaths = [
-  path.resolve(__dirname, "..", ".env"),
-  path.resolve(__dirname, "..", ".gitignore", ".env")
-];
+const envPaths = [path.resolve(__dirname, "..", ".env")];
 
 envPaths.forEach((envPath) => {
   if (fs.existsSync(envPath)) {
